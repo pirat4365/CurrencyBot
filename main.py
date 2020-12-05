@@ -6,7 +6,7 @@ from telebot import types
 import requests
 import re
 
-bot = telebot.TeleBot(token=get_token())
+bot = telebot.TeleBot(token=get_token(),)
 time_list = []
 
 
@@ -150,13 +150,14 @@ def save_quotes(message):
     if rexgex(message.text, r"[A-Z]{3}\s[A-Z]{3}"):
         texted_ = message.text.split(" ")
         quotes = GetApi(texted_[0], texted_[1])
+
         if quotes.send_quotes() is not False:
             bot.send_message(message.from_user.id, f"* {quotes.send_quotes()}*",
                              parse_mode='Markdown')
             insert_db(int(message.from_user.id), message.from_user.first_name, message.text, "".join(time_list))
-            print(time_list)
-            if len(time_list) >= 1:
+            while len(time_list) >= 1:
                 time_list.clear()
+
 
             bot.send_message(message.from_user.id, "*Сохранено!\n "
                                                    "Для начала работы введите /start*",
@@ -179,6 +180,5 @@ def save_quotes(message):
                                                "Введите команду /start,и повторите все сначало!*\n",
                          parse_mode="Markdown",
                          reply_markup=types.ReplyKeyboardRemove())
-
 
 bot.polling()

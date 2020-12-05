@@ -1,5 +1,5 @@
 from parserconf import conf_BD
-from mysql.connector import MySQLConnection
+from mysql.connector import MySQLConnection, Error, errorcode
 
 
 def insert_db(id_users, name, choice, times):
@@ -7,15 +7,21 @@ def insert_db(id_users, name, choice, times):
     args = (id_users, name, choice, times)
     db_config = conf_BD()
     conn = MySQLConnection(**db_config)
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute(f"""CREATE TABLE IF NOT EXISTS Users(
-                                            id_users INT, 
-                                            name TEXT, 
-                                            quotes TEXT, 
-                                            time TIME)""")
-        cursor.execute(query, args)
-        conn.commit()
+    try:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute(f"""CREATE TABLE IF NOT EXISTS Users(
+                                                id_users INT, 
+                                                name TEXT, 
+                                                quotes VARCHAR(7), 
+                                                time TIME)""")
+
+            cursor.execute(query, args)
+            conn.commit()
+    except Error and errorcode as e:
+        print(e)
+    finally:
+        print("GG")
 
 
 def check_data(args, text):
@@ -24,22 +30,25 @@ def check_data(args, text):
     id_users = []
     quotes_users = []
     time_users = []
-    with conn:
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM Users")
+    try:
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM Users")
 
-        rows = cur.fetchall()
+            rows = cur.fetchall()
 
-        for row in rows:
-            if row[0] == args:
-                id_users.append(row[0])
-                time_users.append(row[3])
-                quotes_users.append(row[2])
+            for row in rows:
+                if row[0] == args:
+                    id_users.append(row[0])
+                    time_users.append(row[3])
+                    quotes_users.append(row[2])
 
-    if args in id_users:
-        if text == "quotes":
-            return quotes_users
-        elif text == "time":
-            return time_users
-    else:
-        return False
+        if args in id_users:
+            if text == "quotes":
+                return quotes_users
+            elif text == "time":
+                return time_users
+        else:
+            return False
+    except Error and errorcode as e:
+        print(e)
