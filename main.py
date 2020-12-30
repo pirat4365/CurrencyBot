@@ -1,12 +1,12 @@
 from parserconf import get_token
+from api import GetApi
 from db import insert_db, check_data
 import telebot
 import time
 from telebot import types
-import requests
 import re
 
-bot = telebot.TeleBot(token=get_token(),)
+bot = telebot.TeleBot(token=get_token(), )
 time_list = []
 
 
@@ -17,34 +17,6 @@ def rexgex(text, rex):
     else:
         return False
 
-
-class GetApi:
-    def __init__(self, base, symbols):
-        self.api = "https://api.exchangeratesapi.io/latest"
-        self.base = base
-        self.symbols = symbols
-
-    def send_quotes(self):
-        quotes = None
-        page = requests.get(self.api, params={
-            'base': self.base,
-            'symbols': self.symbols
-        })
-        if page.ok:
-            page_ = page.json()['rates']
-            for key, value in page_.items():
-                quotes = f" {self.base} -> {self.symbols} {round(value, 2)}"
-            return quotes
-        else:
-            return False
-
-    def all_quotes(self):
-        page = requests.get(self.api, params="rates")
-        page_ = page.json()['rates']
-        quotes = sorted([])
-        for key in page_:
-            quotes.append(key)
-        return ', '.join(quotes)
 
 
 def keyboard_start(a, b):
@@ -158,7 +130,6 @@ def save_quotes(message):
             while len(time_list) >= 1:
                 time_list.clear()
 
-
             bot.send_message(message.from_user.id, "*Сохранено!\n "
                                                    "Для начала работы введите /start*",
                              parse_mode='Markdown')
@@ -180,5 +151,6 @@ def save_quotes(message):
                                                "Введите команду /start,и повторите все сначало!*\n",
                          parse_mode="Markdown",
                          reply_markup=types.ReplyKeyboardRemove())
+
 
 bot.polling()

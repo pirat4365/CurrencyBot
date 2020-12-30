@@ -1,5 +1,5 @@
 from parserconf import conf_BD
-from mysql.connector import MySQLConnection, Error, errorcode
+from mysql.connector import MySQLConnection, Error
 
 
 def insert_db(id_users, name, choice, times):
@@ -18,7 +18,7 @@ def insert_db(id_users, name, choice, times):
 
             cursor.execute(query, args)
             conn.commit()
-    except Error and errorcode as e:
+    except Error as e:
         print(e)
     finally:
         print("GG")
@@ -50,5 +50,5 @@ def check_data(args, text):
                 return time_users
         else:
             return False
-    except Error and errorcode as e:
+    except Error as e:
         print(e)

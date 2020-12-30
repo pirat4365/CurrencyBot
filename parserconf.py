@@ -21,3 +21,9 @@ def get_token(filename='config.ini'):
     token.read(filename)
     TOKEN = token.get('token', "TOKEN")
     return TOKEN
+
+def get_api(filename='config.ini'):
+    api = ConfigParser()
+    api.read(filename)
+    API = api.get("api", "api")
+    return API
