@@ -3,8 +3,9 @@ from api import GetApi
 from db import insert_db, check_data
 import telebot
 import time
-from telebot import types
 import re
+from keyboard import Keyboard, ReplyKeyboardRemove
+
 
 bot = telebot.TeleBot(token=get_token(), )
 time_list = []
@@ -18,21 +19,11 @@ def rexgex(text, rex):
         return False
 
 
-
-def keyboard_start(a, b):
-    keyboards = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    button_setting = types.KeyboardButton(a)
-    button_quotes = types.KeyboardButton(b)
-    keyboards.add(button_setting, button_quotes)
-
-    return keyboards
-
-
 @bot.message_handler(commands=["start"])
 def start_bot(message):
     msg = bot.send_message(message.from_user.id, f"*Доброго времени суток {message.from_user.first_name}*",
                            parse_mode="Markdown",
-                           reply_markup=keyboard_start("Настройки", "Выдать котировки"))
+                           reply_markup=Keyboard("Настройки", "Выдать котировки", resize_keyboard=True))
     bot.register_next_step_handler(msg, press_setting)
 
 
@@ -43,7 +34,7 @@ def press_setting(message):
                          f'*Окей {message.from_user.first_name},выбери время отправки,а так же валютную пару\n'
                          f'С понедельника по пятницу,я буду отправлять ваши котировки!*',
                          parse_mode="Markdown",
-                         reply_markup=types.ReplyKeyboardRemove())
+                         reply_markup=ReplyKeyboardRemove())
         time.sleep(1)
         msg = bot.send_message(message.from_user.id, "*Введите время формата HH:MM \n "
                                                      "Например: 21:49*",
@@ -61,7 +52,7 @@ def press_setting(message):
                     api = GetApi(times[0], times[1])
                     bot.send_message(message.from_user.id, f'*{api.send_quotes()}*',
                                      parse_mode="Markdown",
-                                     reply_markup=types.ReplyKeyboardRemove())
+                                     reply_markup=telebot.types.ReplyKeyboardRemove)
             bot.send_message(message.from_user.id, f'*/start*', parse_mode='Markdown')
 
         else:
@@ -69,13 +60,13 @@ def press_setting(message):
                              f'*{message.from_user.first_name},к сожалению ваши данные не сохранены\n'
                              f'Для добавления данные введите /start,и нажмите Настройки*',
                              parse_mode="Markdown",
-                             reply_markup=types.ReplyKeyboardRemove())
+                             reply_markup=telebot.types.ReplyKeyboardRemove())
 
     else:
         bot.send_message(message.from_user.id, "*Что то пошло не так,попробуйте еще раз,"
                                                "введите команду /start*",
                          parse_mode="Markdown",
-                         reply_markup=types.ReplyKeyboardRemove())
+                         reply_markup=telebot.types.ReplyKeyboardRemove)
 
 
 @bot.message_handler(func=lambda message: True)
@@ -85,7 +76,7 @@ def press_quotes(message):
         msg = bot.send_message(message.from_user.id,
                                "*Хорошо,со временем все отлично,осталось разобраться с валютной парой\n*",
                                parse_mode="Markdown",
-                               reply_markup=keyboard_start("Добавить еще", "Сохранить"))
+                               reply_markup=Keyboard("Добавить еще", "Сохранить"))
 
         bot.register_next_step_handler(msg, add_save)
 
@@ -94,7 +85,7 @@ def press_quotes(message):
         bot.send_message(message.from_user.id, "*Вы ввели неправильный формат времени,попробуйте еще раз,введите"
                                                "команду \n /start*",
                          parse_mode="Markdown",
-                         reply_markup=types.ReplyKeyboardRemove())
+                         reply_markup=telebot.types.ReplyKeyboardRemove())
 
 
 @bot.message_handler(func=lambda message: True, content_types=["text"])
@@ -105,7 +96,7 @@ def add_save(message):
                                                      "Данный пример покажет соотношение доллара к рублю\n"
                                                      "Посмотреть валютные пары можно командой /quotes*\n",
                                parse_mode="Markdown",
-                               reply_markup=types.ReplyKeyboardRemove())
+                               reply_markup=telebot.types.ReplyKeyboardRemove())
         bot.register_next_step_handler(msg, save_quotes)
 
     elif message.text == "Сохранить":
@@ -114,10 +105,10 @@ def add_save(message):
     else:
         bot.send_message(message.from_user.id, "Что то пошло не так,попробуйте еще раз,введите"
                                                "команду /start",
-                         reply_markup=types.ReplyKeyboardRemove())
+                         reply_markup=telebot.types.ReplyKeyboardRemove())
 
 
-@bot.message_handler(func=lambda message: True, content_types=["text"])
+@bot.message_handler(func=lambda messages: True, content_types=["text"])
 def save_quotes(message):
     if rexgex(message.text, r"[A-Z]{3}\s[A-Z]{3}"):
         texted_ = message.text.split(" ")
@@ -137,7 +128,7 @@ def save_quotes(message):
             bot.send_message(message.from_user.id, "*Неправильная котировка валюты\n"
                                                    "Введите команду /start,и повторите все сначало!*\n",
                              parse_mode="Markdown",
-                             reply_markup=types.ReplyKeyboardRemove())
+                             reply_markup=telebot.types.ReplyKeyboardRemove())
 
     elif message.text == "/quotes":
         quotes__ = GetApi(None, None)
@@ -145,12 +136,13 @@ def save_quotes(message):
                                                f"/start*",
 
                          parse_mode="Markdown",
-                         reply_markup=types.ReplyKeyboardRemove())
+                         reply_markup=telebot.types.ReplyKeyboardRemove())
     else:
         bot.send_message(message.from_user.id, "*Неправильная котировка валюты\n"
                                                "Введите команду /start,и повторите все сначало!*\n",
                          parse_mode="Markdown",
-                         reply_markup=types.ReplyKeyboardRemove())
+                         reply_markup=telebot.types.ReplyKeyboardRemove())
 
 
-bot.polling()
+if __name__ == '__main__':
+    bot.polling()
