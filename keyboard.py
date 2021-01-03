@@ -6,7 +6,5 @@ class Keyboard(ReplyKeyboardMarkup):
         super(Keyboard, self).__init__(resize_keyboard=None)
         self.resize_keyboard = resize_keyboard
         self.a = a
-        print(type(a))
         self.b = b
-        print(type(b))
         self.add(KeyboardButton(self.a), KeyboardButton(self.b))

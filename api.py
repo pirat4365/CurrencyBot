@@ -3,7 +3,7 @@ from parserconf import get_api
 
 
 class GetApi:
-    def __init__(self, base, symbols):
+    def __init__(self, base=None, symbols=None):
         self.api = get_api()
         self.base = base
         self.symbols = symbols
@@ -24,8 +24,6 @@ class GetApi:
             for key, value in page_.items():
                 quotes = f" {self.base} -> {self.symbols} {round(value, 2)}"
             return quotes
-        else:
-            return False
 
     def all_quotes(self):
         page = requests.get(self.api, params="rates")
