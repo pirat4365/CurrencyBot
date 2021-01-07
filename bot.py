@@ -1,12 +1,12 @@
 from parserconf import get_token
 from api import GetApi
-from db import insert_db, check_data
+from db import User
 import telebot
 import time
 from keyboard import Keyboard, ReplyKeyboardRemove
 
 bot = telebot.TeleBot(token=get_token())
-time_list = []
+DB = User()
 
 
 @bot.message_handler(commands=["start"])
@@ -20,12 +20,13 @@ def start_bot(message):
 @bot.message_handler(regexp="setting")
 def press_setting(message):
     if message.text == "Настройки":
-        quots = check_data(message.from_user.id, "quotes")
-        times = check_data(message.from_user.id, 'time')
+        quots = DB.return_quotes(message.from_user.id)
+        times = DB.return_time(message.from_user.id)
         if quots and times:
+            args = [f"""----> """.join(x) for x in zip(quots, times)]
             msg = bot.send_message(message.from_user.id, f"*{message.from_user.first_name} ваши котировки и время "
                                                          f"отправления:\n "
-                                                         f"{' '.join(quots)} --> {times} \n*",
+                                                         f"{' | '.join(args)}*",
                                    parse_mode="Markdown",
                                    reply_markup=Keyboard("Добавить еще", "Сохранить", resize_keyboard=True))
             bot.register_next_step_handler(msg, add_more)
@@ -37,7 +38,7 @@ def press_setting(message):
                                    reply_markup=ReplyKeyboardRemove())
             bot.register_next_step_handler(msg, add_more)
     elif message.text == "Выдать котировки":
-        quots = check_data(message.from_user.id, "quotes")
+        quots = DB.return_quotes(message.from_user.id)
         if quots:
             for i in quots:
                 _quots = i.split(" ")
@@ -95,7 +96,7 @@ def press_quotes(message):
     try:
         quotes_ = GetApi()
         time.strptime(message.text, "%H:%M")
-
+        DB.insert_db(message.from_user.id, message.from_user.first_name, message.text)
         bot.send_message(message.from_user.id,
                          "*Хорошо,со временем все отлично,осталось разобраться с валютной парой\n*",
                          parse_mode="Markdown")
@@ -106,7 +107,6 @@ def press_quotes(message):
                                parse_mode="Markdown",
                                reply_markup=ReplyKeyboardRemove())
         bot.register_next_step_handler(msg, save_quotes)
-        return time_list.append(message.text)
     except ValueError:
         bot.send_message(message.from_user.id, "*Вы ввели неправильный формат времени,попробуйте еще раз,введите"
                                                "команду \n /start*",
@@ -121,10 +121,7 @@ def save_quotes(message):
     if texted_[0] in quotes.all_quotes() and texted_[1] in quotes.all_quotes():
         bot.send_message(message.from_user.id, f"* {quotes.send_quotes()}*",
                          parse_mode='Markdown')
-        insert_db(int(message.from_user.id), message.from_user.first_name, message.text, "".join(time_list))
-        while len(time_list) >= 1:
-            time_list.clear()
-
+        DB.update_db(message.text)
         bot.send_message(message.from_user.id, "*Сохранено!\n "
                                                "Для начала работы введите /start*",
                          parse_mode='Markdown')
