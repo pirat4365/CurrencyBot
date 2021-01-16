@@ -65,10 +65,10 @@ class User:
         quotes = []
         try:
             with conn:
-                cursor.execute(f"""SELECT quotes FROM Users WHERE id_user={id_users}""")
+                cursor.execute(f"""SELECT quotes FROM Users WHERE id_user={id_users} AND quotes IS NOT NULL""")
                 for quots in cursor.fetchall():
-                        convert = list(quots[0])
-                        quotes.append("".join(convert))
+                    convert = list(quots[0])
+                    quotes.append("".join(convert))
                 return quotes
         except Error as e:
             print(e)
@@ -76,7 +76,6 @@ class User:
     def return_time(self, id_user):
         conn = MySQLConnection(**conf_BD())
         cursor = conn.cursor()
-
         try:
             with conn:
                 cursor.execute(f"""SELECT time FROM Users WHERE id_user={id_user} """)
@@ -87,15 +86,33 @@ class User:
         except Error as e:
             print(e)
 
-"""
-a.insert_db(417610028, "Taide", "22:11")
+    def return_user(self):
+        conn = MySQLConnection(**conf_BD())
+        cursor = conn.cursor()
+        try:
+            with conn:
+                cursor.execute("""SELECT id_user FROM Users""")
+                time = set()
+                for args in cursor.fetchall():
+                    time.add(args[0])
+
+                return time
+        except Error as e:
+            print(e)
+
+
+a = User()
+a.insert_db(417610028, "Taide", "15:14")
 a.update_db("RUB USD")
-a.insert_db(417610028, "Taide", "22:12")
+a.insert_db(417610028, "Taide", "15:15")
+a.update_db("RUB USD")
+"""
+a.insert_db(417610027, "Taide", "22:11")
+a.update_db("RUB USD")
+a.insert_db(417610026, "Taide", "14:58")
 a.update_db("SUB SSD")
-a.insert_db(417610028, "Taide", "22:12")
+a.insert_db(417610025, "Taide", "22:12")
 a.update_db("DUB DSD")
-a.insert_db(417610028, "Taide", "22:13")
+a.insert_db(417610024, "Taide", "22:13")
 a.update_db("ZUB ZSD")
 """
-
-

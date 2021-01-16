@@ -100,7 +100,6 @@ def press_quotes(message):
         bot.send_message(message.from_user.id,
                          "*Хорошо,со временем все отлично,осталось разобраться с валютной парой\n*",
                          parse_mode="Markdown")
-        time.sleep(2)
         msg = bot.send_message(message.from_user.id, f"*Введите валютную пару формата: USD RUB\n"
                                                      "Данный пример покажет соотношение доллара к рублю\n"
                                                      f"Список валют:\n{quotes_.all_quotes()} *",
@@ -116,16 +115,21 @@ def press_quotes(message):
 
 @bot.message_handler(func=lambda messages: True, content_types=["text"])
 def save_quotes(message):
-    texted_ = message.text.split(" ")
-    quotes = GetApi(texted_[0], texted_[1])
-    if texted_[0] in quotes.all_quotes() and texted_[1] in quotes.all_quotes():
-        bot.send_message(message.from_user.id, f"* {quotes.send_quotes()}*",
-                         parse_mode='Markdown')
-        DB.update_db(message.text)
-        bot.send_message(message.from_user.id, "*Сохранено!\n "
-                                               "Для начала работы введите /start*",
-                         parse_mode='Markdown')
-    else:
+    try:
+        texted_ = message.text.split(" ")
+        quotes = GetApi(texted_[0], texted_[1])
+        if texted_[0] in quotes.all_quotes() and texted_[1] in quotes.all_quotes():
+            bot.send_message(message.from_user.id, f"* {quotes.send_quotes()}*",
+                             parse_mode='Markdown')
+            DB.update_db(message.text)
+            bot.send_message(message.from_user.id, "*Сохранено!\n "
+                                                   "Для начала работы введите /start*",
+                             parse_mode='Markdown')
+        else:
+            bot.send_message(message.from_user.id, "*Не могу сохранить :( \n "
+                                                   "/start*",
+                             parse_mode="Markdown")
+    except IndexError:
         bot.send_message(message.from_user.id, "*Неправильная котировка валюты\n"
                                                "Введите команду /start,и повторите все сначало!*\n",
                          parse_mode="Markdown",

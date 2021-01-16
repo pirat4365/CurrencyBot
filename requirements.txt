@@ -1,9 +1,2 @@
-from parserconf import get_token
-from api import GetApi
-from db import insert_db, check_data
-import telebot
-import time
-from keyboard import Keyboard, ReplyKeyboardRemove
-
 mysql-connector-python~=8.0.22
 requests~=2.23.0
